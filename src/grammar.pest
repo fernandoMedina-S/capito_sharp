@@ -1,0 +1,51 @@
+espacio = _{(" " | "\t")*}
+
+numero = { ASCII_DIGIT+ }
+identificador = { ASCII_ALPHA ~ (ASCII_ALPHA | ASCII_DIGIT | "_" )* }
+exp_unit = { identificador | numero | "(" ~ exp_unit ~ ")" | "-" ~ exp_unit }
+
+op_binario = _{ suma | resta | mult | div | modulo | mayor 
+| menor | igual | mayor_igual | menor_igual}
+	suma = _{ "+" }
+    resta = _{ "-" }
+    mult = _{ "*" }
+    div = _{ "/" }
+    modulo = _{ "%" }
+    mayor = _{ ">" }
+    menor = _{ "<" }
+    igual = _{ "==" }
+    mayor_igual = _{ ">=" }
+    menor_igual = _{ "<=" }
+    
+tipo_dato = { int | float | void2 | lul }
+	int = { "int" }
+    float = { "float" }
+    void2 = { "void2" }
+    lul = { "lul" }
+
+expresion_primaria = { exp_unit ~ op_binario ~ exp_unit 
+| exp_unit ~ op_binario ~ expresion_primaria
+| "(" ~ expresion_primaria ~ ")" }
+
+expresion = { expresion_primaria ~ op_binario ~ exp_unit }
+
+instruccion = { (exp_unit~"."~ASCII_ALPHA+) | asignacion }
+
+if = { "if" ~ espacio ~ 
+(expresion_primaria | expresion ) ~ espacio ~ "then" 
+~ "\n" ~ espacio ~ instruccion ~ "\n" ~ "fi" }
+
+declaracion = { "let" ~ espacio ~ identificador ~ ":" ~ espacio ~ 
+tipo_dato ~ espacio ~ "=" ~ espacio ~ exp_unit}
+
+asignacion = { identificador ~ espacio ~ "="  ~ espacio ~ 
+(expresion_primaria | expresion | exp_unit )}
+
+for_loop = { "for" ~ espacio ~ "(" ~ espacio ~ declaracion ~ ";" 
+~ espacio ~ (expresion_primaria | expresion ) ~ ";" 
+~ espacio ~ (instruccion | asignacion ) ~ espacio ~ ")" 
+~ espacio ~ "\n" ~ espacio ~ instruccion ~ "\n" ~ "rof"}
+
+all_rules = { if | expresion | expresion_primaria | exp_unit }
+
+programa = _{ SOI ~ if ~ EOI }
